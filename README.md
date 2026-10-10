@@ -86,12 +86,14 @@ The screenshots above show the application. If you'd like to run it yourself:
 
 ### Setup
 
+
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
-   cd YOUR-REPO
+   git clone https://github.com/racheladu84/retail-analytics-application.git
+   cd retail-analytics-application
    ```
+
 
 2. **Create and activate a virtual environment:**
 
