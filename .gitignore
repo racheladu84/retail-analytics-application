@@ -1,0 +1,28 @@
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+dissertation_env/
+dissertation_envr/
+
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django local files
+db.sqlite3
+db.sqlite3-journal
+*.log
+local_settings.py
+.env
+staticfiles/
+media/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

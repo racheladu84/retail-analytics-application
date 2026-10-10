@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essential & Co | Forecasting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /*css variable*/
+ 
+        :root {
+            --bg-primary: #F5F5F5; 
+            --bg-card: #FFFFFF;
+            --border: #E0E0E0;
+            --text-primary: #333333;
+            --text-secondary: #555555;
+            --nav-bg: #1A1A1A;
+            --accent-yellow: #F2C94C;
+            --accent-teal: #008C8C;
+            --success: #008C8C;
+            --danger: #E05C4B;
+            --warning: #F2C94C;
+        }
+ 
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+ 
+        /*  Navigation - navigation bar remains visible during scroll */
+        .navbar {
+            background-color: var(--nav-bg);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+ 
+        .navbar-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+ 
+        .navbar-brand span {
+            color: var(--accent-yellow);
+        }
+ 
+        .navbar-tabs {
+            display: flex;
+            gap: 4px;
+        }
+ 
+        .nav-tab {
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            color: #94a3b8;
+            transition: all 0.2s;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+ 
+        .nav-tab:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+ 
+        .nav-tab.active {
+            background-color: var(--accent-yellow);
+            color: var(--nav-bg);
+            font-weight: 700;
+        }
+ 
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+ 
+        .nav-user {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+ 
+        .logout-btn {
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            color: #94a3b8;
+            border: 1px solid #444444;
+            transition: all 0.2s;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+ 
+        .logout-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+ 
+        /*  Main content */
+        /*auto margins centres the content horizontally*/
+        .main-content {
+            padding: 28px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+ 
+        .page-header {
+            margin-bottom: 24px;
+        }
+ 
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+ 
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+ 
+        /* KPI Cards  */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+ 
+        .kpi-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        /*total forecast units card*/
+
+        .kpi-card.total {
+            background-color: rgba(0, 140, 140, 0.08);
+             border: 1px solid rgba(0, 140, 140, 0.2);
+        }
+
+        
+        /*normal restock card*/
+
+        .kpi-card.normal {
+             background-color: rgba(0, 140, 140, 0.08);
+            border: 1px solid rgba(0, 140, 140, 0.2);
+        }
+
+        .kpi-card.lowstock {    
+            background-color: rgba(242, 201, 76, 0.12);
+            border: 1px solid rgba(242, 201, 76, 0.3);
+        }
+
+        .kpi-card.overstock {
+            background-color: rgba(224, 92, 75, 0.08);
+            border: 1px solid rgba(224, 92, 75, 0.2);
+        }
+
+        
+        .kpi-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+ 
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        /* KPI value colours mapped to inventory status */
+ 
+        .kpi-value.total { color: var(--accent-teal); }
+        .kpi-value.normal { color: var(--success); }
+        .kpi-value.lowstock { color: #b8960a; }
+        .kpi-value.overstock { color: var(--danger); }
+ 
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+ 
+        /*  Section titles  */
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+        }
+ 
+        /*  Chart cards */
+        .chart-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+ 
+        /*  Two column layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+ 
+        /*  Forecast table */
+        .forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+ 
+        .forecast-table th {
+            text-align: left;
+            padding: 10px 16px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+            background-color: var(--bg-primary);
+        }
+ 
+        .forecast-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+ 
+        .forecast-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* row hover effect for improved readability */
+        .forecast-table tr:hover td {
+            background-color: var(--bg-primary);
+        }
+ 
+        .restock-value {
+            color: #b8960a;
+            font-weight: 600;
+        }
+
+        /* dash displayed when no restock is needed */
+        .restock-na {
+            color: var(--text-secondary);
+        }
+ 
+        /*  Status badges  */
+        .status-badge {
+            font-size: 12px;
+            font-weight: 600;
+        }
+ 
+        .status-badge.normal_stock {
+            
+            color: #008C8C;
+        }
+ 
+        .status-badge.lowstock {
+            
+            color: #b8960a;
+        }
+ 
+        .status-badge.overstock {
+            
+            color: #E05C4B;
+        }
+ 
+        /* override Plotly default width to fill card container */
+        .js-plotly-plot {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body>
+ 
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="navbar-brand">Essential <span>&</span> Co</div>
+    <div class="navbar-tabs">
+        <a href="{% url 'trend_dashboard' %}" class="nav-tab">Trend Detection</a>
+        <!-- forecasting tab only visible to store manager — controlled by is_manager flag -->
+        {% if is_manager %}
+        <a href="{% url 'forecast_dashboard' %}" class="nav-tab active">Forecasting</a>
+        {% endif %}
+    </div>
+    <div class="navbar-right">
+        <span class="nav-user">
+            {% if is_manager %}
+                Store Manager
+            {% else %}
+                Store Assistant
+            {% endif %}
+            · {{ request.user.username }}
+
+            
+        </span>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+</nav>
+ 
+<!-- Main Content -->
+<div class="main-content">
+ 
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-title">Forecasting</div>
+        <div class="page-subtitle">7 day sales forecast and inventory risk assessment for Essential & Co</div>
+    </div>
+ 
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card total">
+            <div class="kpi-label">Total Forecast Units</div>
+            <div class="kpi-value total">{{ total_forecast_units }}</div>
+            <div class="kpi-sub">Forecasted units across all product lines</div>
+        </div>
+        <div class="kpi-card normal">
+            <div class="kpi-label">Normal Stock</div>
+            <div class="kpi-value normal">{{ forecast_summary.normal_stock_count }}</div>
+            <div class="kpi-sub">Product lines at normal stock levels</div>
+        </div>
+        <div class="kpi-card lowstock">
+            <div class="kpi-label">Low Stock</div>
+            <div class="kpi-value lowstock">{{ forecast_summary.low_stock_count }}</div>
+            <div class="kpi-sub">Product lines requiring restocking</div>
+        </div>
+        <div class="kpi-card overstock">
+            <div class="kpi-label">Overstock</div>
+            <div class="kpi-value overstock">{{ forecast_summary.overstock_count }}</div>
+            <div class="kpi-sub">Product lines with excess inventory</div>
+        </div>
+    </div>
+ 
+    <!-- 7 Day Forecast + Inventory vs Forecast -->
+
+    <div class="two-col">
+        <div class="chart-card" style="margin-bottom: 0;">
+            <div class="section-title">7 Day Forecast</div>
+            <!-- 7 day forecast horizontal bar chart — powered by forecast_chart context key -->
+            {{ forecast_chart|safe }}
+        </div>
+        <div class="chart-card" style="margin-bottom: 0;">
+            <div class="section-title">Inventory vs Forecast</div>
+            <!-- inventory vs forecast grouped bar chart — powered by combo_chart context key -->
+            {{ combo_chart|safe }}
+        </div>
+    </div>
+ 
+    <!-- Forecast Table -->
+    <div class="chart-card" style="margin-top: 24px;">
+        <div class="section-title">Forecast Table</div>
+        <table class="forecast-table">
+            <thead>
+                <tr>
+                    <th>Product Line</th>
+                    <th>Forecast Quantity</th>
+                    <th>Available Stock</th>
+                    <th>Restock Needed</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- iterate through forecast_results list from context dictionary -->
+                {% for item in forecast_results %}
+                <tr>
+                    <td>{{ item.product_line }}</td>
+                    <td>{{ item.forecast_quantity }}</td>
+                    <!-- floatformat:0 removes decimal places from stock value -->
+                    <td>{{ item.available_stock|floatformat:0 }}</td>
+                    <td>
+                         <!-- restock quantity only displayed for lowstock product lines
+                             calculated in view as forecast_quantity minus available_stock
+                             dash displayed for normal and overstock product lines -->
+
+
+                        {% if item.stock_status == 'lowstock' %}
+                            <span class="restock-value">+{{ item.restock_needed }}</span>
+                        {% else %}
+                            <span class="restock-na">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <!-- dynamic cSS class applied from stock_status value
+                             maps to colour coded status badge styling -->
+                        <span class="status-badge {{ item.stock_status }}">
+                            {% if item.stock_status == 'normal_stock' %} Normal
+                            {% elif item.stock_status == 'lowstock' %} Low Stock
+                            {% else %} Overstock
+                            {% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+ 
+</div>
+ 
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essential & Co | Trend Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* CSS Variables 
+           global colour system defined at root level
+           ensures consistent colours applied*/
+ 
+        :root {
+            --bg-primary: #F5F5F5; /*page background*/
+            --bg-card: #FFFFFF;  /*card background*/
+            --border: #E0E0E0;
+            --text-primary: #333333;
+            --text-secondary: #555555;
+            --nav-bg: #1A1A1A;  /*navigation background*/
+            --accent-yellow: #F2C94C;
+            --accent-teal: #008C8C;
+            --success: #008C8C;    
+            --danger: #E05C4B;
+            --warning: #F2C94C;
+        }
+ 
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+ 
+        /* Navigation*/
+        .navbar {
+            background-color: var(--nav-bg);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+ 
+        .navbar-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+ 
+        .navbar-brand span {
+            color: var(--accent-yellow);
+        }
+ 
+        .navbar-tabs {
+            display: flex;
+            gap: 4px;
+        }
+ 
+        .nav-tab {
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            color: #94a3b8;
+            transition: all 0.2s;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+ 
+        .nav-tab:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+ 
+        .nav-tab.active {
+            background-color: var(--accent-yellow);
+            color: var(--nav-bg);
+            font-weight: 700;
+        }
+ 
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+ 
+        .nav-user {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+ 
+        .logout-btn {
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            color: #94a3b8;
+            border: 1px solid #444444;
+            transition: all 0.2s;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+ 
+        .logout-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+ 
+        /* Main content
+         max width constrains layout on large screens
+           auto margin centres the content horizontally */
+        .main-content {
+            padding: 28px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+ 
+        .page-header {
+            margin-bottom: 24px;
+        }
+ 
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+ 
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+ 
+        /*  Error messages - displays error messages passed via Django messages framework
+           used for unauthorised access error when store worker
+           attempts to access the forecasting dashboard directly */
+        .error-messages {
+            margin-bottom: 20px;
+        }
+ 
+        .error-messages div {
+            background-color: rgba(224, 92, 75, 0.1);
+            color: var(--danger);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(224, 92, 75, 0.3);
+        }
+ 
+        /* KPI Cards
+        five column grid layout for KPI cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+ 
+        .kpi-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+ 
+        /* KPI card colour fills  */
+        .kpi-card.overall {
+            background-color: rgba(0, 140, 140, 0.08);
+            border: 1px solid rgba(0, 140, 140, 0.2);
+        }
+ 
+        .kpi-card.best {
+            background-color: rgba(0, 140, 140, 0.08);
+            border: 1px solid rgba(0, 140, 140, 0.2);
+        }
+ 
+        .kpi-card.worst {
+            background-color: rgba(224, 92, 75, 0.08);
+            border: 1px solid rgba(224, 92, 75, 0.2);
+        }
+ 
+        .kpi-card.peak {
+            background-color: rgba(242, 201, 76, 0.12);
+            border: 1px solid rgba(242, 201, 76, 0.3);
+        }
+ 
+        .kpi-card.slowest {
+            background-color: rgba(85, 85, 85, 0.06);
+            border: 1px solid rgba(85, 85, 85, 0.15);
+        }
+ 
+        .kpi-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+ 
+        .kpi-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+         /* KPI value colours dynamically applied via trend_result.overall_trend
+           from context dictionary in the template */
+ 
+        .kpi-value.increasing { color: var(--success); }
+        .kpi-value.decreasing { color: var(--danger); }
+        .kpi-value.normal { color: #b8960a; }
+ 
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+ 
+        /* Section titles*/
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+        }
+ 
+        /*  Chart cards
+        white card container for all chart sections  */
+        .chart-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+ 
+        /*  Sales over time tabs 
+        tab buttons switch between daily, weekly and monthly chart views*/
+        .tab-buttons {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+ 
+        .tab-btn {
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            transition: all 0.2s;
+        }
+
+        /* active tab button in dark nav colour */
+        .tab-btn.active {
+            background-color: var(--nav-bg);
+            border-color: var(--nav-bg);
+            color: white;
+        }
+
+        /* tab content hidden by default — active class applied by showTab() */
+ 
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+ 
+        /* Two column layout 
+         cSS grid two column layout for side by side chart display */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+ 
+        /*  Productline trend status
+          flex column layout for stacked trend status items */ 
+        .trend-status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+
+
+       /* flex column layout for stacked trend status items */
+        .chart-description {
+            font-size: 12px;
+            color: #555555;
+            margin: 0 0 8px 0;
+            padding: 0;
+        }
+
+        /* trend status note 
+           legend explaining increasing, decreasing and stable classifications
+           displayed below the product line trend status list */
+        .trend-status-note {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .trend-status-note p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 4px 0;
+        }
+
+        .note-increasing {
+            color: #008C8C;
+            font-size: 10px;
+        }
+
+        .note-decreasing {
+            color: #E05C4B;
+            font-size: 10px;
+        }
+
+        .note-stable {
+            color: #555555;
+            font-size: 10px;
+        }
+ 
+        .trend-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+ 
+        .trend-product-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+ 
+        .trend-badge {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* trend badge colors mapped o trend staus value */
+        .trend-badge.increasing { color: #008C8C; }
+        .trend-badge.decreasing { color: #E05C4B; }
+        .trend-badge.normal { color: #b8960a; }
+ 
+        /*  Chart header - with filter flexbox layout positions chart title and dropdown filter on same row*/
+          
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+ 
+        .chart-header .section-title {
+            margin-bottom: 0;
+        }
+
+        /* dropdown filter
+           product line dropdown filter for monthly category trend chart*/
+ 
+        .filter-select {
+            padding: 7px 12px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            outline: none;
+            cursor: pointer;
+        }
+       /* override Plotly default width to fill card container */
+        .js-plotly-plot {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body>
+ 
+<!-- Navigation
+ trend detection tab set as active to indicate current page -->
+<nav class="navbar">
+    <div class="navbar-brand">Essential <span>&</span> Co</div>
+    <div class="navbar-tabs">
+        <!-- trend detection tab always visible to both user roles -->
+        <a href="{% url 'trend_dashboard' %}" class="nav-tab active">Trend Detection</a>
+        <!-- forecasting tab only visible to store manager-->
+
+        {% if is_manager %}
+        <a href="{% url 'forecast_dashboard' %}" class="nav-tab">Forecasting</a>
+        {% endif %}
+    </div>
+    <div class="navbar-right">
+        <span class="nav-user">
+            <!-- display user role label based on is_manager flag from context -->
+
+            {% if is_manager %}Store Manager{% else %}Store Assistant{% endif %}
+            · {{ request.user.username }}
+        </span>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+</nav>
+ 
+<!-- Main Content -->
+<div class="main-content">
+ 
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-title">Trend Detection</div>
+        <div class="page-subtitle">Historical sales analysis for Essential & Co</div>
+    </div>
+ 
+    <!-- Error Messages 
+     used to display RBAC unauthorised access error when store worker
+         attempts to access the forecasting dashboard directly via URL -->
+    {% if messages %}
+    <div class="error-messages">
+        {% for message in messages %}
+        <div>{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+ 
+    <!-- KPI Cards data passed from context dictionary via trend result  -->
+    <div class="kpi-grid">
+        
+        <div class="kpi-card overall">
+            <!--static label - no context data needed-->
+            <div class="kpi-label">Overall Trend</div>
+            <div class="kpi-value {{ trend_result.overall_trend }}">
+                  
+                {% if trend_result.overall_trend == 'increasing' %} Increasing
+                {% elif trend_result.overall_trend == 'decreasing' %} Decreasing
+                {% else %} Stable
+                {% endif %}
+            </div>
+        </div>
+        <div class="kpi-card best">
+            <div class="kpi-label">Best Product Line</div>
+            <div class="kpi-value">{{ trend_result.best_productline }}</div>
+            <div class="kpi-sub">£{{ trend_result.best_productline_sale|floatformat:0 }}</div>
+        </div>
+        <div class="kpi-card worst">
+            <div class="kpi-label">Worst Product Line</div>
+            <div class="kpi-value">{{ trend_result.worst_productline }}</div>
+            <div class="kpi-sub">£{{ trend_result.worst_productline_sale|floatformat:0 }}</div>
+        </div>
+        <div class="kpi-card peak">
+            <div class="kpi-label">Peak Day</div>
+            <div class="kpi-value">{{ trend_result.peak_day }}</div>
+        </div>
+        <div class="kpi-card slowest">
+            <div class="kpi-label">Slowest Day</div>
+            <div class="kpi-value">{{ trend_result.slowest_day }}</div>
+        </div>
+    </div>
+ 
+    <!-- Sales Over Time 
+     three Plotly line charts for daily, weekly and monthly sales trends-->
+    <div class="chart-card">
+        <div class="section-title">Sales Over Time</div>
+         <!-- tab buttons — onclick calls showTab() with tab name and button reference -->
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="showTab('daily', this)">Daily</button>
+            <button class="tab-btn" onclick="showTab('weekly', this)">Weekly</button>
+            <button class="tab-btn" onclick="showTab('monthly', this)">Monthly</button>
+        </div>
+         <!-- daily chart — active by default on page load -->
+
+        <div id="daily" class="tab-content active">{{ daily_chart|safe }}</div> <!--renders the chart-->
+         <!-- weekly and monthly charts hidden until tab is clicked -->
+        <div id="weekly" class="tab-content">{{ weekly_chart|safe }}</div>
+        <div id="monthly" class="tab-content">{{ monthly_chart|safe }}</div>
+    </div>
+
+
+
+    <!-- Product Line Ranking + Category Trend Status -->
+    <div class="two-col">
+        <div class="chart-card" style="margin-bottom: 0;">
+            <div class="section-title">Product Line Ranking</div>
+             <!-- chart description provides context for the ranking chart -->
+            <p class="chart-description">Total cumulative sales per product line across the full 3 month period, ranked from highest to lowest revenue.</p>
+            {{ ranking_chart|safe }}
+        </div>
+        <div class="chart-card" style="margin-bottom: 0;">
+            <div class="section-title">ProductLine Trend Status</div>
+
+            <!-- iterate through trend_status list from context dictionary
+                 each item contains product_line and trend_status values
+                 dynamic CSS class applied from trend_status value for colour coding -->
+
+
+            <div class="trend-status-list">
+                {% for item in trend_status %}
+                <div class="trend-status-item">
+                    <span class="trend-product-name">{{ item.product_line }}</span>
+                    <span class="trend-badge {{ item.trend_status }}">
+                        {% if item.trend_status == 'increasing' %}Increasing
+                        {% elif item.trend_status == 'decreasing' %}Decreasing
+                        {% else %}Stable
+                        {% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- legend explaining trend status classifications to the user -->
+
+            <div class="trend-status-note">
+                <p><span class="note-increasing">&#9679;</span> Increasing - by the end of the 3 month period, this product line was selling more on average than it was at the start</p>
+                <p><span class="note-decreasing">&#9679;</span> Decreasing - by the end of the 3 month period, this product line was selling less on average than it was at the start</p>
+                <p><span class="note-stable">&#9679;</span> Stable - this product line maintained a consistent sales average across the 3 month period</p>
+            </div>
+        </div>
+    </div>
+ 
+ 
+    <!-- Monthly Category Trend with filter
+     dual panel Plotly chart showing monthly sales and growth rate -->
+    <div class="chart-card" style="margin-top: 24px;">
+        <div class="chart-header">
+            <div class="section-title">ProductLine Monthly  Trend</div>
+             <!-- gET form — onchange submits form automatically when selection changes-->
+            <form method="GET">
+                <select name="product_line" class="filter-select" onchange="this.form.submit()">
+                    {% for product in product_lines %}
+                     <!-- selected attribute maintains current selection after page reload -->
+                    <option value="{{ product }}" {% if product == selected_product_line %}selected{% endif %}>
+                        {{ product }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <!-- dual panel chart — passed as HTML string from context via |safe filter -->
+        {{ dual_chart|safe }}
+    </div>
+ 
+    <!-- Busy Day Analysis -->
+    <div class="chart-card">
+        <div class="section-title">Busy Day Analysis</div>
+        {{ busy_chart|safe }}    <!-- allow for the rendering of chart to template safely-->
+    </div>
+ 
+</div>
+<!--  JavaScript
+     showTab() handles tab switching for the Sales Over Time section
+     removes active class from all tab content divs and tab buttons -->
+ 
+<script>
+    function showTab(tabName, btn) {
+        // remove active class from all tab content divs — hides all charts
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+         // remove active class from all tab buttons — resets button styles
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        // apply active class to selected tab content — shows selected chart
+
+        document.getElementById(tabName).classList.add('active');
+        // apply active class to selected tab content — shows selected chart
+        btn.classList.add('active');
+    }
+</script>
+ 
+</body>
+</html

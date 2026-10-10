@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essential & Co | Staff Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* flexbox centres the login card both vertically and horizontally
+           fills the full viewport height for a clean centred layout */
+ 
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #F5F5F5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /*Login Wrapper keeps the login card to a maximum width of 420px
+           centres content with flexbox column layout */
+ 
+        .login-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+ 
+        /*Store branding */
+        .store-brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+ 
+        .store-name {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1A1A1A;
+            letter-spacing: -0.5px;
+        }
+ 
+        .store-name span {
+            color: #008C8C;
+        }
+ 
+        .store-tagline {
+            color: #555555;
+            font-size: 12px;
+            margin-top: 6px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+ 
+        /* Login card */
+        .login-container {
+            background-color: #FFFFFF;
+            padding: 36px;
+            border-radius: 16px;
+            width: 100%;
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+ 
+        /* Form groups  */
+        .form-group {
+            margin-bottom: 18px;
+        }
+ 
+        .form-group label {
+            display: block;
+            color: #555555;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+ 
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #F5F5F5;
+            border: 1px solid #E0E0E0;
+            border-radius: 10px;
+            color: #333333;
+            font-size: 14px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+ 
+        .form-group input:focus {
+            border-color: #008C8C;
+            box-shadow: 0 0 0 3px rgba(0, 140, 140, 0.1);
+        }
+ 
+        .form-group input::placeholder {
+            color: #AAAAAA;
+        }
+ 
+        /* Password hint  displays password requirements below the password input field
+          */ 
+        .password-hint {
+            display: block;
+            color: #E05C4B;
+            font-size: 11px;
+            margin-top: 7px;
+            line-height: 1.5;
+        }
+ 
+        /* Sign in button  */
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            background-color: #1A1A1A;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+ 
+        .login-btn:hover {
+            background-color: #333333;
+            transform: translateY(-1px);
+        }
+ 
+        .login-btn:active {
+            transform: translateY(0);
+        }
+ 
+        /*  Forgot password */
+        .forgot-password {
+            display: block;
+            text-align: center;
+            color: #008C8C;
+            font-size: 13px;
+            text-decoration: none;
+            margin-top: 14px;
+            transition: color 0.2s;
+        }
+ 
+        .forgot-password:hover {
+            color: #006666;
+            text-decoration: underline;
+        }
+ 
+        /* Error messages  */
+        .error-messages {
+            margin-bottom: 20px;
+        }
+ 
+        .error-messages p {
+            background-color: rgba(224, 92, 75, 0.08);
+            color: #E05C4B;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(224, 92, 75, 0.25);
+        }
+    </style>
+</head>
+<body>
+ 
+<div class="login-wrapper">
+ 
+    <!-- store branding -->
+    <div class="store-brand">
+        <div class="store-name">Essential <span>&</span> Co</div>
+        <div class="store-tagline">Store Analytics Portal</div>
+    </div>
+ 
+    <div class="login-container">
+ 
+        <!-- error messages -->
+        {% if messages %}
+        <div class="error-messages">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+ 
+        <!-- login form
+         POST method submits credentials to login_view for processing 
+         csrf_token provides cross site request forgery protection
+         Django middleware validates the token on every POST submission
+          -->
+
+        
+        <form method="POST">
+            {% csrf_token %}
+ 
+            <div class="form-group">
+                <label for="employee_id">Employee ID</label>
+                <!--employee ID input is a rewuired attribute prevent empty submission-->
+                <input
+                    type="text"
+                    id="employee_id"
+                    name="employee_id"
+                    placeholder="Enter your employee ID"
+                    required
+                    autocomplete="off"
+                >
+            </div>
+
+
+ 
+            <div class="form-group">
+                <label for="password">Password</label>
+                <!--password input - required attribute prevent empty submission-->
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                >
+                <small class="password-hint">
+                    ⚠ Min 6 characters. Must include uppercase, lowercase, number and one of: ! @ # $ % & * - _
+                </small>
+            </div>
+
+            <!-- submit button triggers form POST to login_view -->
+ 
+            <button type="submit" class="login-btn">Sign In</button>
+
+            <!-- forgot password link directs to password reset placeholder page -->
+ 
+            <a href="{% url 'password_reset' %}" class="forgot-password">Forgot password?</a>
+ 
+        </form>
+ 
+    </div>
+ 
+</div>
+ 
+</body>
