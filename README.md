@@ -224,4 +224,4 @@ Manual black-box UI testing with 42 test cases covering authentication, password
 
 ## Author
 
-Rachel Adu, BSc Computer Sciencr
+Rachel Adu
